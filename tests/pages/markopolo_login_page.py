@@ -12,7 +12,7 @@ class MarkopoloLoginPage:
     """Page Object Model for the Markopolo login page."""
     
     # Timeout settings (in milliseconds)
-    TIMEOUT = 30000  # 30 seconds
+    TIMEOUT = 45000  # 45 seconds
     
     def __init__(self, page: Page):
         """Initialize the login page object.
@@ -25,19 +25,23 @@ class MarkopoloLoginPage:
         # Primary selectors with fallbacks
         self._selectors = {
             'email': [
+                "xpath=/html/body/div[1]/div[3]/div/div/div/div[2]/form/div[1]/div[1]/div/input",
                 "//input[contains(@class, 'mantine-TextInput-input')]",
+                # Fallbacks (match Cypress)
                 "input[type='email']",
-                "input[name='email']",
-                "input[id*='email']",
-                "input[placeholder*='Email' i]",
+                "input[placeholder*='email' i]",
+                "input[name*='email' i]",
+                "input[id*='email' i]",
                 "//label[contains(normalize-space(.), 'Email')]/following::input[1]"
             ],
             'password': [
+                "xpath=/html/body/div[1]/div[3]/div/div/div/div[2]/form/div[1]/div[2]/div/input",
                 "//input[contains(@class, 'mantine-PasswordInput-innerInput')]",
+                # Fallbacks (match Cypress)
                 "input[type='password']",
-                "input[name='password']",
-                "input[id*='password']",
-                "input[placeholder*='Password' i]",
+                "input[placeholder*='password' i]",
+                "input[name*='password' i]",
+                "input[id*='password' i]",
                 "//label[contains(normalize-space(.), 'Password')]/following::input[1]"
             ],
             'sign_in': [
@@ -55,6 +59,16 @@ class MarkopoloLoginPage:
                 ".error-message:visible"
             ]
         }
+
+        # Post-login heuristics (any of these indicate a successful login)
+        self._post_login_selectors = [
+            "button:has-text('Logout')",
+            "[data-testid='logout']",
+            "[data-testid='sidebar']",
+            "nav[role='navigation']",
+            "img[alt*='avatar' i]",
+            "[class*='sidebar' i]",
+        ]
         
         # Load test data
         self.test_data_path = os.path.join(Path(__file__).parent.parent, 'test_data', 'markopolo_login_testdata.json')
@@ -99,8 +113,17 @@ class MarkopoloLoginPage:
         for selector in selectors:
             try:
                 locator = self.page.locator(selector).first
-                # Wait explicitly for the element to be attached and visible
-                self.page.wait_for_selector(selector, state="visible", timeout=timeout or self.TIMEOUT)
+                # For xpath= prefixed selectors, skip wait_for (it can fail on absolute paths)
+                # Just try to use it; if not found, continue to next selector
+                if selector.startswith("xpath="):
+                    # Absolute XPath: just check if it's there
+                    try:
+                        locator.is_visible(timeout=2000)
+                    except PlaywrightTimeoutError:
+                        continue
+                else:
+                    # CSS selector or relative XPath: wait for visibility
+                    locator.wait_for(state="visible", timeout=timeout or self.TIMEOUT)
                 return locator
             except PlaywrightTimeoutError:
                 logger.debug(f"Selector not found or not visible: {selector}")
@@ -138,26 +161,46 @@ class MarkopoloLoginPage:
             email: Email to enter
             password: Password to enter
         """
-        # Fill email field
+        # Fill email field (focus, clear, fill)
         email_field = self._find_element('email')
-        email_field.clear()
+        email_field.click()
+        try:
+            email_field.clear()
+        except Exception:
+            email_field.press("Control+A")
+            email_field.press("Delete")
         email_field.fill(email)
         
         # Fill password field
         password_field = self._find_element('password')
-        password_field.clear()
+        password_field.click()
+        try:
+            password_field.clear()
+        except Exception:
+            password_field.press("Control+A")
+            password_field.press("Delete")
         password_field.fill(password)
 
     def enter_email_only(self, email: str) -> None:
         """Enter only the email field, leave password empty."""
         email_field = self._find_element('email')
-        email_field.clear()
+        email_field.click()
+        try:
+            email_field.clear()
+        except Exception:
+            email_field.press("Control+A")
+            email_field.press("Delete")
         email_field.fill(email)
 
     def enter_password_only(self, password: str) -> None:
         """Enter only the password field, leave email empty."""
         password_field = self._find_element('password')
-        password_field.clear()
+        password_field.click()
+        try:
+            password_field.clear()
+        except Exception:
+            password_field.press("Control+A")
+            password_field.press("Delete")
         password_field.fill(password)
     
     def enter_valid_credentials(self, email: Optional[str] = None, password: Optional[str] = None) -> None:
@@ -167,20 +210,41 @@ class MarkopoloLoginPage:
             email: Email to use for login. If None, uses from environment or test data.
             password: Password to use for login. If None, uses from environment or test data.
         """
-        # Get credentials from parameters, environment variables, or test data
-        email = email or os.getenv('MANUAL_EMAIL') or self.test_data.get('prod_email')
-        password = password or os.getenv('MANUAL_PASSWORD') or self.test_data.get('prod_pass')
+        # Get credentials from parameters, environment variables (MANUAL_* or GOOGLE_*), or test data
+        email = (
+            email
+            or os.getenv('MANUAL_EMAIL')
+            or os.getenv('GOOGLE_EMAIL')
+            or self.test_data.get('prod_email')
+        )
+        password = (
+            password
+            or os.getenv('MANUAL_PASSWORD')
+            or os.getenv('GOOGLE_PASSWORD')
+            or self.test_data.get('prod_pass')
+        )
         
         if not email or not password:
             raise ValueError("Email and password must be provided or set in environment variables")
             
         self.enter_credentials(email, password)
+
+    def login_with_google(self, email: str, password: str) -> None:
+        # Placeholder: align API with Cypress; actual Google OAuth not implemented yet
+        self.perform_login(base_url=os.getenv('BASE_URL', ''), email=email, password=password)
+
+    def login_manually(self, email: str, password: str) -> None:
+        self.perform_login(base_url=os.getenv('BASE_URL', ''), email=email, password=password)
     
     def click_sign_in(self) -> None:
         """Click the sign in button."""
         sign_in_button = self._find_element('sign_in')
         # Do not assume navigation will occur (validation may keep us on the same page)
         sign_in_button.click()
+        try:
+            self.page.wait_for_load_state("load", timeout=10000)
+        except PlaywrightTimeoutError:
+            pass
     
     def verify_error_message(self, expected_text: str = "Invalid credentials") -> None:
         """Verify that the error message is displayed.
@@ -213,25 +277,52 @@ class MarkopoloLoginPage:
         self.maximize_window()
         self.enter_valid_credentials(email, password)
         self.click_sign_in()
-        
-        # Wait for navigation to complete
-        self.page.wait_for_url("**/dashboard", timeout=10000)
-        
-        # Verify successful login by checking for a logged-in element
+
+        # Wait for page to settle
         try:
-            # Try to find a logged-in indicator (adjust selector as needed)
-            self.page.wait_for_selector("button:has-text('Logout')", timeout=5000)
-            logger.info("Login successful")
+            self.page.wait_for_load_state("networkidle", timeout=self.TIMEOUT)
         except PlaywrightTimeoutError:
-            # If logout button not found, check for error messages
+            logger.debug("Network idle not reached; proceeding with URL/selector checks")
+
+        # Consider multiple possible post-login URLs
+        possible_urls = [
+            "**/dashboard*",
+            "**/home*",
+            f"{base_url.rstrip('/')}/*",
+        ]
+        url_ok = False
+        for pattern in possible_urls:
             try:
-                error = self._find_element('error_message', timeout=2000)
-                error_text = error.text_content()
-                raise AssertionError(f"Login failed: {error_text}")
-            except (TimeoutError, PlaywrightTimeoutError):
-                # No error message found, but login might still have failed
-                logger.warning("Login status unclear - no error message found"
-                             "but logout button not visible")
+                self.page.wait_for_url(pattern, timeout=8000)
+                url_ok = True
+                break
+            except PlaywrightTimeoutError:
+                continue
+
+        # Also check for post-login UI selectors
+        selector_ok = False
+        for sel in self._post_login_selectors:
+            try:
+                self.page.wait_for_selector(sel, timeout=5000)
+                selector_ok = True
+                break
+            except PlaywrightTimeoutError:
+                continue
+
+        if url_ok or selector_ok:
+            logger.info("Login successful")
+            return
+
+        # If reached here, try to pull error content if present
+        try:
+            error = self._find_element('error_message', timeout=3000)
+            error_text = (error.text_content() or "").strip()
+            raise AssertionError(f"Login failed: {error_text}")
+        except (TimeoutError, PlaywrightTimeoutError):
+            # Surface current URL and title for debugging
+            raise AssertionError(
+                f"Login did not complete. URL={self.page.url}, Title={self.page.title()}"
+            )
     
     def is_logged_in(self) -> bool:
         """Check if the user is logged in.

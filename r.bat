@@ -74,7 +74,7 @@ set BASE_URL=!BASE_URL!
 if not "!MANUAL_EMAIL!"=="" set MANUAL_EMAIL=!MANUAL_EMAIL!
 if not "!MANUAL_PASSWORD!"=="" set MANUAL_PASSWORD=!MANUAL_PASSWORD!
 
-REM Run pytest
-py -3.13 -m pytest tests/test_markopolo_login.py -v !HEADFLAG! --browser=!BROWSER!
+REM Run pytest (generic discovery)
+py -3.13 -m pytest -v !HEADFLAG! --browser=!BROWSER!
 
 endlocal
