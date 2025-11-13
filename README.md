@@ -15,10 +15,19 @@ Run the interactive test runner. It will:
 - Ask which server to test (Staging/Production)
 - Ask for login email/password (optional)
 
+Windows:
 ```
 ./r.bat                # defaults: Staging, Chromium, headless
 ./r.bat stg chromium headed
 ./r.bat prod firefox   # Production, Firefox, headless
+```
+
+macOS/Linux:
+```
+chmod +x r.sh          # first time only
+./r.sh                 # defaults: Staging, Chromium, headless
+./r.sh stg chromium headed
+./r.sh prod firefox    # Production, Firefox, headless
 ```
 
 The runner sets `BASE_URL` based on your choice and passes credentials to tests when provided.
@@ -31,7 +40,7 @@ Set environment and run with Python 3.13 to match your installed packages:
 $env:BASE_URL="https://beta-stg.markopolo.ai"
 $env:MANUAL_EMAIL="you@example.com"      # optional
 $env:MANUAL_PASSWORD="your_password"     # optional
-py -3.13 -m pytest tests/test_markopolo_login.py -v --browser=chromium --headed
+py -3.13 -m pytest -v --browser=chromium --headed
 ```
 
 Other browsers: `--browser=firefox` or `--browser=webkit`
