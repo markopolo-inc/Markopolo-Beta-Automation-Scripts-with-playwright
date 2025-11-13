@@ -36,17 +36,6 @@ py -3.13 -m pytest tests/test_markopolo_login.py -v --browser=chromium --headed
 
 Other browsers: `--browser=firefox` or `--browser=webkit`
 
-## Test Scenarios Covered
-
-- Login page navigation and title
-- Sign-in with empty fields (validation)
-- Invalid credentials (error message)
-- Only email provided (validation)
-- Only password provided (validation)
-- Valid credentials (dashboard and logged-in indicator)
-
-Google OAuth test is currently skipped (placeholder).
-
 ## Project Structure
 
 - `tests/` – Test suites
