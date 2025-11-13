@@ -1,49 +1,91 @@
-# Markopolo-Beta-Automation-Scripts-with-playwright
+# Markopolo Playwright Automation
 
-This is a Playwright-based test automation framework for Markopolo Beta.
+Playwright-based UI automation for Markopolo (Staging/Production) with a simple interactive runner.
 
-## Setup
+## Prerequisites
 
-1. Install Python 3.8 or higher
-2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Install Playwright browsers:
-   ```
-   playwright install
-   ```
+- Python 3.13 (recommended to match installed packages)
+- Windows PowerShell or Command Prompt
 
-## Running Tests
+## Quick Start (Recommended)
 
-Run all tests:
+Run the interactive test runner. It will:
+- Install/verify Python dependencies
+- Install Playwright browsers
+- Ask which server to test (Staging/Production)
+- Ask for login email/password (optional)
+
 ```
-pytest
-```
-
-Run a specific test file:
-```
-pytest tests/test_example.py
+./r.bat                # defaults: Staging, Chromium, headless
+./r.bat stg chromium headed
+./r.bat prod firefox   # Production, Firefox, headless
 ```
 
-Run tests in headed mode:
+The runner sets `BASE_URL` based on your choice and passes credentials to tests when provided.
+
+## Advanced: Run Directly with Pytest
+
+Set environment and run with Python 3.13 to match your installed packages:
+
 ```
-pytest --headed
+$env:BASE_URL="https://beta-stg.markopolo.ai"
+$env:MANUAL_EMAIL="you@example.com"      # optional
+$env:MANUAL_PASSWORD="your_password"     # optional
+py -3.13 -m pytest tests/test_markopolo_login.py -v --browser=chromium --headed
 ```
+
+Other browsers: `--browser=firefox` or `--browser=webkit`
+
+## Test Scenarios Covered
+
+- Login page navigation and title
+- Sign-in with empty fields (validation)
+- Invalid credentials (error message)
+- Only email provided (validation)
+- Only password provided (validation)
+- Valid credentials (dashboard and logged-in indicator)
+
+Google OAuth test is currently skipped (placeholder).
 
 ## Project Structure
 
-- `tests/` - Test files (to be created)
-- `pages/` - Page object models (to be created)
-- `utils/` - Utility functions and helpers (to be created)
-- `conftest.py` - Pytest fixtures (to be created)
-- `pytest.ini` - Pytest configuration
-- `requirements.txt` - Python dependencies
+- `tests/` – Test suites
+  - `test_markopolo_login.py` – Login flow tests
+- `tests/pages/` – Page Objects
+  - `markopolo_login_page.py` – Login page POM
+- `tests/test_data/` – Test data JSON
+- `tests/conftest.py` – Playwright fixtures (browser/context/page)
+- `pytest.ini` – Pytest config (markers, logging)
+- `requirements.txt` – Dependencies
+- `r.bat` – One-command interactive runner
 
-## Best Practices
+## Credentials
 
-1. Use page object model pattern
-2. Keep tests independent and isolated
-3. Use fixtures for setup/teardown
-4. Add proper error handling and assertions
-5. Use environment variables for sensitive data
+- Preferred: set env vars before running, or provide at the prompt in `r.bat`.
+  - `MANUAL_EMAIL` and `MANUAL_PASSWORD`
+- The valid login test will also use provided defaults if env vars are not set.
+
+## Troubleshooting
+
+- "fixture 'context' not found" or CLI option conflicts:
+  - The project uses its own Playwright fixtures in `tests/conftest.py`. We removed custom CLI option registration to avoid conflicts with plugins.
+
+- Running with the wrong Python version:
+  - If dependencies were installed under Python 3.13, run tests as `py -3.13 -m pytest ...`.
+
+- Navigation timeouts:
+  - Network may be slow. We increased timeouts and made navigation more tolerant; re-run in `--headed` for debugging.
+
+## Markers
+
+- `@pytest.mark.login` – Login tests
+- `@pytest.mark.smoke` – Smoke subset
+- `@pytest.mark.manual` – Requires manual input/credentials
+
+## Notes
+
+- Environments:
+  - Staging: `https://beta-stg.markopolo.ai`
+  - Production: `https://beta.markopolo.ai`
+
+If you need CI instructions or a PowerShell version of the runner, let me know.
