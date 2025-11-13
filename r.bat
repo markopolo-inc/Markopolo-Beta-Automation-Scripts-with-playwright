@@ -51,28 +51,22 @@ if "%ENV_CHOICE%"=="2" (
   set ENV=stg
 )
 
-REM Prompt for credentials (optional, press Enter to skip)
-echo.
-echo Enter login credentials (press Enter to skip):
-set /p MANUAL_EMAIL=Email: 
-set /p MANUAL_PASSWORD=Password: 
-
 echo.
 echo ============== Test Configuration ==============
 echo Environment : !ENV!  (BASE_URL=!BASE_URL!)
 echo Browser     : !BROWSER!
-REM If user provided credentials and no explicit headed flag, enable headed by default
-if "!HEADFLAG!"=="" if not "!MANUAL_EMAIL!"=="" set HEADFLAG=--headed
 echo Headed      : !HEADFLAG!
-if not "!MANUAL_EMAIL!"=="" echo Email       : [provided]
-if "!MANUAL_EMAIL!"=="" echo Email       : [not provided]
+if not "!MANUAL_EMAIL!"=="" echo Email       : [provided via env]
+if "!MANUAL_EMAIL!"=="" echo Email       : [not set - use MANUAL_EMAIL env var]
 echo ==================================================
+echo.
+echo Note: Set MANUAL_EMAIL and MANUAL_PASSWORD environment variables before running
+echo Example: set MANUAL_EMAIL=your@email.com
+echo          set MANUAL_PASSWORD=yourpassword
 echo.
 
 REM Export environment variables for this session
 set BASE_URL=!BASE_URL!
-if not "!MANUAL_EMAIL!"=="" set MANUAL_EMAIL=!MANUAL_EMAIL!
-if not "!MANUAL_PASSWORD!"=="" set MANUAL_PASSWORD=!MANUAL_PASSWORD!
 
 REM Run pytest (generic discovery)
 py -3.13 -m pytest -v !HEADFLAG! --browser=!BROWSER!

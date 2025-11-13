@@ -9,28 +9,33 @@ Playwright-based UI automation for Markopolo (Staging/Production) with a simple 
 
 ## Quick Start (Recommended)
 
-Run the interactive test runner. It will:
-- Install/verify Python dependencies
-- Install Playwright browsers
-- Ask which server to test (Staging/Production)
-- Ask for login email/password (optional)
+Set environment variables first, then run the interactive test runner:
 
-Windows:
+**Windows:**
 ```
+set MANUAL_EMAIL=your@email.com
+set MANUAL_PASSWORD=yourpassword
 ./r.bat                # defaults: Staging, Chromium, headless
 ./r.bat stg chromium headed
 ./r.bat prod firefox   # Production, Firefox, headless
 ```
 
-macOS/Linux:
+**macOS/Linux:**
 ```
+export MANUAL_EMAIL=your@email.com
+export MANUAL_PASSWORD=yourpassword
 chmod +x r.sh          # first time only
 ./r.sh                 # defaults: Staging, Chromium, headless
 ./r.sh stg chromium headed
 ./r.sh prod firefox    # Production, Firefox, headless
 ```
 
-The runner sets `BASE_URL` based on your choice and passes credentials to tests when provided.
+The runner will:
+- Install/verify Python dependencies
+- Install Playwright browsers
+- Ask which server to test (Staging/Production)
+- Use `MANUAL_EMAIL` and `MANUAL_PASSWORD` env vars for valid login tests
+- Set `BASE_URL` based on your choice
 
 ## Advanced: Run Directly with Pytest
 

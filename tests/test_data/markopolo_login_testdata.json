@@ -1,7 +1,8 @@
 {
   "valid_credentials": {
-    "email": "fagun115946@gmail.com",
-    "password": "Fagun115946@gmail.com"
+    "email": null,
+    "password": null,
+    "note": "Use MANUAL_EMAIL and MANUAL_PASSWORD environment variables"
   },
   "invalid_credentials": [
     {
