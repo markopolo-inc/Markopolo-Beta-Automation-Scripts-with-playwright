@@ -1,4 +1,137 @@
 {
+  "valid_credentials": {
+    "email": "fagun115946@gmail.com",
+    "password": "Fagun115946@gmail.com"
+  },
+  "invalid_credentials": [
+    {
+      "email": "invalid@example.com",
+      "password": "wrongpassword123",
+      "description": "Non-existent user with wrong password"
+    },
+    {
+      "email": "test@markopolo.ai",
+      "password": "wrongpass",
+      "description": "Existing email format but wrong password"
+    }
+  ],
+  "edge_cases": {
+    "empty_fields": {
+      "email": "",
+      "password": "",
+      "description": "Both fields empty"
+    },
+    "empty_email": {
+      "email": "",
+      "password": "somepassword123",
+      "description": "Email empty, password provided"
+    },
+    "empty_password": {
+      "email": "test@example.com",
+      "password": "",
+      "description": "Email provided, password empty"
+    },
+    "whitespace_only_email": {
+      "email": "   ",
+      "password": "password123",
+      "description": "Email with only whitespace"
+    },
+    "whitespace_only_password": {
+      "email": "test@example.com",
+      "password": "   ",
+      "description": "Password with only whitespace"
+    },
+    "email_without_domain": {
+      "email": "testuser",
+      "password": "password123",
+      "description": "Email without domain extension"
+    },
+    "email_with_invalid_format": {
+      "email": "test@.com",
+      "password": "password123",
+      "description": "Email with invalid format (missing domain name)"
+    },
+    "email_with_spaces": {
+      "email": "test @example.com",
+      "password": "password123",
+      "description": "Email with spaces"
+    },
+    "very_long_email": {
+      "email": "verylongemailaddress1234567890verylongemailaddress1234567890@example.com",
+      "password": "password123",
+      "description": "Email exceeding typical length limits"
+    },
+    "very_long_password": {
+      "email": "test@example.com",
+      "password": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "description": "Password exceeding typical length limits"
+    },
+    "email_case_sensitivity": {
+      "email": "TEST@EXAMPLE.COM",
+      "password": "password123",
+      "description": "Email in uppercase (testing case sensitivity)"
+    },
+    "special_characters_in_password": {
+      "email": "test@example.com",
+      "password": "P@$$w0rd!#%&*",
+      "description": "Password with special characters"
+    },
+    "sql_injection_attempt_email": {
+      "email": "' OR '1'='1",
+      "password": "password",
+      "description": "SQL injection attempt in email field"
+    },
+    "sql_injection_attempt_password": {
+      "email": "test@example.com",
+      "password": "' OR '1'='1",
+      "description": "SQL injection attempt in password field"
+    },
+    "xss_attempt_email": {
+      "email": "<script>alert('xss')</script>",
+      "password": "password123",
+      "description": "XSS attempt in email field"
+    },
+    "xss_attempt_password": {
+      "email": "test@example.com",
+      "password": "<script>alert('xss')</script>",
+      "description": "XSS attempt in password field"
+    }
+  },
+  "boundary_cases": {
+    "minimum_email": {
+      "email": "a@b.c",
+      "password": "password123",
+      "description": "Minimum valid email format"
+    },
+    "email_with_plus": {
+      "email": "test+alias@example.com",
+      "password": "password123",
+      "description": "Email with plus addressing"
+    },
+    "email_with_dot": {
+      "email": "test.user@example.com",
+      "password": "password123",
+      "description": "Email with dot in local part"
+    },
+    "email_with_hyphen": {
+      "email": "test-user@example.com",
+      "password": "password123",
+      "description": "Email with hyphen in domain"
+    },
+    "email_with_numbers": {
+      "email": "test123@example456.com",
+      "password": "password123",
+      "description": "Email with numbers in both parts"
+    }
+  },
+  "performance_cases": {
+    "rapid_login_attempts": {
+      "count": 5,
+      "email": "test@example.com",
+      "password": "wrongpassword",
+      "description": "Multiple rapid login attempts (testing rate limiting)"
+    }
+  },
   "prod_invalid_email": "invalid@example.com",
   "prod_invalid_pass": "invalidpass123",
   "prod_email": "your_email@example.com",
